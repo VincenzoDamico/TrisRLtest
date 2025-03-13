@@ -55,13 +55,14 @@ public class TrisGui implements KeyListener {
     private void loadQtable() {
         File file = new File(Costants.NAME_FILE_BOT);
         if (!file.exists()) {
-            q_table=new Qtable(Costants.GRID_DIMX,Costants.GRID_DIMY,Costants.PLAYER_SYMBOL,Costants.BOT_SYMBOL);
+            q_table=new Qtable(Costants.GRID_DIMX,Costants.GRID_DIMY,Costants.PLAYER_SYMBOL,Costants.BOT_SYMBOL,Costants.EMPTY_SYMBOL);
         }else {
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
                 // Lettura dell'oggetto dal file
                 q_table = (Qtable)ois.readObject();
-                if (q_table.getGridDimX()!=Costants.GRID_DIMX || q_table.getGridDimY()!=Costants.GRID_DIMX) {
-                    q_table = new Qtable(Costants.GRID_DIMX, Costants.GRID_DIMY, Costants.PLAYER_SYMBOL,Costants.BOT_SYMBOL);
+                if (q_table.getGridDimX()!=Costants.GRID_DIMX || q_table.getGridDimY()!=Costants.GRID_DIMY || !(Costants.BOT_SYMBOL.equals(q_table.getSymbol1())||Costants.BOT_SYMBOL.equals(q_table.getSymbol2())) ||
+                        !(Costants.PLAYER_SYMBOL.equals(q_table.getSymbol1())||Costants.PLAYER_SYMBOL.equals(q_table.getSymbol2())) ||!Costants.EMPTY_SYMBOL.equals(q_table.getEmptySymbol())) {
+                    q_table = new Qtable(Costants.GRID_DIMX, Costants.GRID_DIMY, Costants.PLAYER_SYMBOL,Costants.BOT_SYMBOL,Costants.EMPTY_SYMBOL);
                     JOptionPane.showMessageDialog(null, "Qtable si riferisce ad una griglia differente da quella che si sta esaminando", "Notifica", JOptionPane.INFORMATION_MESSAGE);
                 }
                 else{
@@ -73,7 +74,7 @@ public class TrisGui implements KeyListener {
                 JOptionPane.showMessageDialog(null, "Errore durante la lettura del file: ", "Problema", JOptionPane.ERROR_MESSAGE);
 
                 System.err.println("Errore durante la lettura del file: " + e.getMessage());
-                q_table=new Qtable(Costants.GRID_DIMX,Costants.GRID_DIMY,Costants.PLAYER_SYMBOL,Costants.BOT_SYMBOL);
+                q_table=new Qtable(Costants.GRID_DIMX,Costants.GRID_DIMY,Costants.PLAYER_SYMBOL,Costants.BOT_SYMBOL,Costants.EMPTY_SYMBOL);
             }
         }
     }

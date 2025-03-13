@@ -1,6 +1,7 @@
 package tris;
 import tris.utils.Pair;
 import java.io.Serializable;
+import java.io.StreamTokenizer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -14,16 +15,35 @@ public class Qtable implements Cloneable,Serializable{
     private HashMap<String ,Float[]> qtable;
     private int gridDimX;
     private int gridDimY;
-    private String[] symbols; //dopo controllo se la configurazione è accetabile
+    private String symbol1;
+    private String symbol2;
+    private String emptySymbol;
 
 
-
-    public Qtable(int gridDimX, int gridDimY,String ...symbols) {
+    public Qtable(int gridDimX, int gridDimY,String symbol1, String symbol2, String emptySymbol) {
+        if(symbol1.equals(emptySymbol)||symbol2.equals(symbol1)||emptySymbol.equals(symbol2))
+            throw new IllegalArgumentException();
         this.gridDimX=gridDimX;
         this.gridDimY=gridDimY;
-        this.symbols=symbols;
+        this.symbol1=symbol1;
+        this.symbol2=symbol2;
+        this.emptySymbol=emptySymbol;
         qtable= new HashMap<String,Float[]>();
     }
+    public boolean acceptable_configuration(String config ){
+        String cleanedString=config.replaceAll("\\s","");
+        if(!cleanedString.replaceAll("[" + symbol1 + symbol2 + emptySymbol + "]", "").trim().isEmpty() )
+            return false;
+        int count2 = 0, count1 = 0;
+        for (char c: cleanedString.toCharArray()){
+            if (c==symbol1.charAt(0))
+                count1++;
+            if (c==symbol2.charAt(0))
+                count2++;
+        }
+        return count1 == count2 || count2 + 1 == count1 || count2 == count1 + 1;
+    }
+
 
     public int getGridDimX() {
         return gridDimX;
@@ -35,6 +55,8 @@ public class Qtable implements Cloneable,Serializable{
 
     //devo esccludere le azioni non possibili?
     public float maxValue(String configuration) {
+        if(!acceptable_configuration(configuration))
+            throw new IllegalArgumentException();
 
         Float[] f=qtable.get(configuration);
         if (f==null) {
@@ -51,6 +73,13 @@ public class Qtable implements Cloneable,Serializable{
     }
 
     public  Pair<Integer,Integer> maxKnowAction(String configuration,List<Pair<Integer,Integer>>possibleAction) {
+        if(!acceptable_configuration(configuration))
+            throw new IllegalArgumentException();
+        for (Pair<Integer,Integer> a: possibleAction){
+            if(a.getFirst()<0 || a.getSecond()<0 || a.getSecond()>gridDimY || a.getFirst()>gridDimX)
+                throw new IllegalArgumentException();
+        }
+
         Float[] f=qtable.get(configuration);
 
         System.out.println("PossibleAction:");
@@ -119,24 +148,50 @@ public class Qtable implements Cloneable,Serializable{
             }
         }
     }
+    public String getSymbol1() {
+        return symbol1;
+    }
 
+    public String getSymbol2() {
+        return symbol2;
+    }
+
+    public String getEmptySymbol() {
+        return emptySymbol;
+    }
 
     public float getValue(String configuration,Pair<Integer,Integer> action) {
+        if(!acceptable_configuration(configuration) || action.getFirst()<0 || action.getSecond()<0 || action.getSecond()>gridDimY || action.getFirst()>gridDimX)
+            throw new IllegalArgumentException();
+
         if(!qtable.containsKey(configuration))
             return -1;
         return qtable.get(configuration)[action.getFirst()*(gridDimY)+action.getSecond()];
     }
     public void setValue(String configuration,Pair<Integer,Integer> action,float value) {
+        if(!acceptable_configuration(configuration) || action.getFirst()<0 || action.getSecond()<0 || action.getSecond()>gridDimY || action.getFirst()>gridDimX)
+            throw new IllegalArgumentException();
+
         if(qtable.containsKey(configuration)) {
             qtable.get(configuration)[action.getFirst()*(gridDimY)+action.getSecond()]=value;
         }
 
     }
     public Float[] getKnowAction(String configuration){
+        if(!acceptable_configuration(configuration))
+            throw new IllegalArgumentException();
+
         return qtable.get(configuration);
     }
 
     public  Pair<Integer,Integer> explore(String configuration,List<Pair<Integer,Integer>>possibleAction) {
+        if(!acceptable_configuration(configuration))
+            throw new IllegalArgumentException();
+        for (Pair<Integer,Integer> a: possibleAction){
+            if(a.getFirst()<0 || a.getSecond()<0 || a.getSecond()>gridDimY || a.getFirst()>gridDimX)
+                throw new IllegalArgumentException();
+        }
+
         Float[] f=qtable.get(configuration);
 
         System.out.println("PossibleAction:");
@@ -194,14 +249,7 @@ public class Qtable implements Cloneable,Serializable{
         }
 
     }
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + Arrays.hashCode(symbols);
-        result = prime * result + Objects.hash(gridDimX, gridDimY, qtable);
-        return result;
-    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -211,15 +259,28 @@ public class Qtable implements Cloneable,Serializable{
         if (getClass() != obj.getClass())
             return false;
         Qtable other = (Qtable) obj;
-        return gridDimX == other.gridDimX && gridDimY == other.gridDimY && Objects.equals(qtable, other.qtable)
-                && Arrays.equals(symbols, other.symbols);
+        return Objects.equals(emptySymbol, other.emptySymbol) && gridDimX == other.gridDimX
+                && gridDimY == other.gridDimY && Objects.equals(qtable, other.qtable)
+                && Objects.equals(symbol1, other.symbol1) && Objects.equals(symbol2, other.symbol2);
     }
+
+    @Override
+    public int hashCode() {
+        int result = qtable.hashCode();
+        result = 31 * result + gridDimX;
+        result = 31 * result + gridDimY;
+        result = 31 * result + symbol1.hashCode();
+        result = 31 * result + symbol2.hashCode();
+        result = 31 * result + emptySymbol.hashCode();
+        return result;
+    }
+
     @Override
     public Qtable clone(){
         Qtable qClone=null;
         try {
             super.clone();
-            qClone= new Qtable(gridDimX,gridDimY,symbols);
+            qClone= new Qtable(gridDimX,gridDimY,symbol1,symbol2,emptySymbol);
             if (!qtable.isEmpty()) {
                 for (String key:qtable.keySet()) {
                     Float[] val =new Float[gridDimX*gridDimY];
@@ -266,7 +327,11 @@ public class Qtable implements Cloneable,Serializable{
     }
 
     public float hasLearned(Qtable oldqtable) {
-	/*System.out.println("Confronto, qtable: ");
+        if( oldqtable.gridDimX!=gridDimX || oldqtable.gridDimY!=gridDimY || !oldqtable.emptySymbol.equals(emptySymbol) ||
+        !oldqtable.symbol1.equals(symbol1)||!oldqtable.symbol2.equals(symbol2) )
+            throw new IllegalArgumentException();
+
+        /*System.out.println("Confronto, qtable: ");
 		System.out.println(this);
 		System.out.println("e Oldqtable: ");
 		System.out.println(oldqtable);*/
@@ -279,10 +344,10 @@ public class Qtable implements Cloneable,Serializable{
             if (oldVal!=null) {
                 for (int i=0; i<gridDimX*gridDimY-1;i++) {
                     if(val[i]!=null && oldVal[i]!=null) {
-                        count+=Math.pow(val[i]-oldVal[i],2);
+                        count+= (float) Math.pow(val[i]-oldVal[i],2);
                     }else {
                         if(val[i]!=null && oldVal[i]==null) {
-                            count+=Math.pow(val[i],2);
+                            count+= (float) Math.pow(val[i],2);
                         }
                     }
 
@@ -290,7 +355,7 @@ public class Qtable implements Cloneable,Serializable{
             }else {
                 for (int i=0; i<gridDimX*gridDimY-1;i++) {
                     if(val[i]!=null) {
-                        count+=Math.pow(val[i],2);
+                        count+= (float) Math.pow(val[i],2);
                     }
                 }
             }

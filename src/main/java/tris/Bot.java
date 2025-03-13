@@ -46,7 +46,7 @@ public class Bot extends QlearnigTemplate{
         String ret="";
         for(int i=0;i<Costants.GRID_DIMX;i++){
             for(int j=0;j<Costants.GRID_DIMY;j++){
-                ret+=grid[i][j].getText().equals(" ") ?"- \t":grid[i][j].getText()+" \t";
+                ret+=grid[i][j].getText().equals(" ") ?Costants.EMPTY_SYMBOL+" \t":grid[i][j].getText()+" \t";
             }
             ret+="\n";
         }

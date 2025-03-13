@@ -31,6 +31,9 @@ public final class Costants {
     public static final float EPSILON =0.025f;
     public  static final String BOT_SYMBOL = "X";
     public static final String PLAYER_SYMBOL = "O";
+    public static final String EMPTY_SYMBOL = "-";
+
+
     public static final String NAME_FILE_BOT="C:\\Users\\Mariangela\\tesiWorkspace\\tris\\qtableObjectX";
 
     public static final Color BOT_COLOR= new Color(0,0,255);;
