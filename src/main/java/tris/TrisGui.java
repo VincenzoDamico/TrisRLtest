@@ -163,7 +163,7 @@ public class TrisGui implements KeyListener {
     private void creationGui() {
         frame =new JFrame("Tris");
         setFrame();
-        lblTitle =new JLabel("Tris");
+        lblTitle =new JLabel("Tris Match:" + nMatch);
         setTitle();
         frame.getContentPane().add(lblTitle);
         lblinfo = new JLabel("");
@@ -176,8 +176,7 @@ public class TrisGui implements KeyListener {
     }
 
     private void manageTris(int x, int y) {
-        if (nMatch>2)
-            lblinfo.setText("BotWin: "+botWin+" PlayerWin: "+playerWin+" Draw :"+draw);
+        lblinfo.setText("BotWin: "+botWin+" PlayerWin: "+playerWin+" Draw :"+draw);
 
         if(gridFields[x][y].getText().equals(" ")&&!isWinner(Costants.BOT_SYMBOL)&&!isWinner(Costants.PLAYER_SYMBOL)&&!fullGrid()){
             if (waitOpponent) {
